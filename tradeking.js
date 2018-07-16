@@ -41,6 +41,9 @@ function call(uri, callback) {
   ); 
 }
 
+/*
+ * [JavaProject] Two functions exported, and called by app.js
+ */
 exports.quotes = function(tickers, callback) {
 	try {
 		call('/market/quotes.json?symbols='+tickers.join(',')+'&delayed=false', callback);
