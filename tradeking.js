@@ -8,6 +8,11 @@ var configuration = {
   access_secret: ""
 }
 
+/*
+ * [JavaProject] How to call TradingKing/AllyInvesment API, is explaiend in 
+ *   (1) https://www.ally.com/api/invest/documentation/getting-started/
+ *   (2) https://www.ally.com/api/invest/documentation/market-ext-quotes-get-post/
+ */
 var consumer = new oauth.OAuth(
   "https://developers.tradeking.com/oauth/request_token",
   "https://developers.tradeking.com/oauth/access_token",
