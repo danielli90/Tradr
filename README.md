@@ -3,7 +3,8 @@ Tradr
 
 Simple stock trading bot built with Node and usses the Tradeking API. Stocks are traded based on the slope of an exponential moving average (EMA) of the stock price. When the slope goes from negative, to positive, that is a buy singal. When it goes from positive to negativeg, that is a sell signal.
 
-[**JavaProject**] This trading bot writtine in javascript (Node.js), is a good starting point for java-based trading bot project. Added comments to the project, to prepare for the conversion to java-based trading bot. Comments, started with [**JavaProject**] are added to the javacript files, to explain and discuss how to convert to java program
+[**JavaProject**] All comments below are **JavaProject** comments.
+This trading bot writtine in javascript (Node.js), is a good starting point for java-based trading bot project. Added comments to the project, to prepare for the conversion to java-based trading bot. Comments, started with [**JavaProject**] are added to the javacript files, to explain and discuss how to convert to java program
 
 References -
 
