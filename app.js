@@ -112,7 +112,9 @@ function sellStock(data) {
 	data.profit += profit;
 
 	/*
-	 * [JavaProject] Trasaction book-keeping, for debuggign bot-behahior
+	 * [JavaProject] Trasaction book-keeping, for debuggign bot-behahior. Instead of "db.addTrasaction", 
+	 *   JavaProject can simply print the transaction to the console. One can load the output to an excel spreadsheet for
+	 *   offline analysis later.
 	 */
 	transactions.push('selling '+data.shares+' of '+data.sym+' at '+data.current_price+' with '+data.profit+' profit');
 	db.addTransaction(ticker, "SELL", data.bought_at, data.current_price, data.shares, now);
@@ -204,6 +206,11 @@ function trade(ticker, quote) {
 		sell = true;
 	}
 
+	/*
+	 * [JavaProject] "db" is Node.js specific. JavaProject may want to dump the result to console,
+	 *   to achieve the same effect as "db" - to monitor Tradr behavior; the output to console can be dumped
+	 *   to a file, for offline analysis later.
+	 */
 	db.addPrice(ticker, current_price, now, data.last_vol);
 
 	/*
@@ -219,7 +226,9 @@ function trade(ticker, quote) {
 		transactions.push('buying '+data.shares+' of '+data.sym+' at '+data.current_price);
 		data.bought_at = current_price;
 		/*
-		 * [JavaProject] Transaction is tracked, for book-keeping and debugging of the bot behavior.
+		 * [JavaProject] Transaction is tracked, for book-keeping and debugging of the bot behavior. Instead of 
+		 *   "db.addTrasaction", JavaProject can simply print the transaction to the console. One can load the output to an excel spreadsheet for
+	         *   offline analysis later.
 		 */
 		db.addTransaction(ticker, "BUY", data.bought_at, null, data.shares, now);
 	}
