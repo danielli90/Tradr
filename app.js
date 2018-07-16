@@ -19,6 +19,9 @@ process.on('uncaughtException', function(err) {
 	phone.sendError(err);
 });
 
+/*
+ * [JavaProject] stocks to watch and purchase defined in watch and shares Array
+ */
 /************************************************
  * Stocks to collect data for and stocks to trade
  ************************************************/
@@ -102,9 +105,15 @@ function sellTime() {
 }
 
 function sellStock(data) {
+	/*
+	 * [JavaProject] update ticker object in portfolior, calculating profit
+	 */
 	var profit = (data.current_price * data.shares) - (data.bought_at * data.shares);
 	data.profit += profit;
 
+	/*
+	 * [JavaProject] Trasaction book-keeping, for debuggign bot-behahior
+	 */
 	transactions.push('selling '+data.shares+' of '+data.sym+' at '+data.current_price+' with '+data.profit+' profit');
 	db.addTransaction(ticker, "SELL", data.bought_at, data.current_price, data.shares, now);
 
@@ -116,14 +125,18 @@ function sellStock(data) {
  ************************************************/
 function trade(ticker, quote) {
 	if(portfolio[ticker] == null) {
+		/*
+		 * [JavaProject] protofolio is an array of ticker object; every ticker object consists of child objects below, tracks
+		 *   EMA (Exponential Moving Average), Slopes, purchaing and selling prices of a ticker.
+		 */
 		portfolio[ticker] = {'sma':[], 
-			                'prices':[], 
+			        'prices':[], 
 					'slopes':[],
 					'bought_at':0,
 					'sold_at':0,
-				        'profit':0,
+				    'profit':0,
 					'current_sma':0,
-		                     'current_price':0,
+		            'current_price':0,
 					'shares':shares[ticker],
 					'sym':ticker,
 					'last_vol':0};
@@ -140,6 +153,11 @@ function trade(ticker, quote) {
 	data.current_price = current_price;
 	data.prices.push(current_price);
 		
+	/*
+	 * [JavaProject] After collecting 20 price points (sma_size is defined as 20 here), start calculating first true
+	 *   SMA (Simplified Moving Average), explained in 
+	 *   http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_averages
+	 */
 	//figure out SMA
 	if(data.prices.length == sma_size) {
 		var sum = 0;
@@ -153,10 +171,19 @@ function trade(ticker, quote) {
 
 	// EMA
 	} else if(data.sma.length >= 1) { 
+		/*
+		 * [JavaProject] After one true SMA (Simplified Moving Average) is available, starts EMA calculation and saves
+		 *   EMA to the data.sma array (the name of the array is misleading now).
+		 *   EMA calculation is explained in http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:moving_averages
+		 */
 		current_sma = (2/(sma_size+1)) * (current_price - data.current_sma) + data.current_sma;
 		data.sma.push(data.current_sma);
 	}
 
+	/* 
+	 * [JavaProject] Per http://stockcharts.com/school/doku.php?id=chart_school:technical_indicators:slope, the slope calculation
+	 *   is a linear regression of EMA points. The calculation below seems a simplified version of linear regression (?)
+	 */
 	//calculate slope
 	if(data.sma.length >= 10) {
 		slope = ((data.sma[data.sma.length-1] - data.sma[data.sma.length-10]) / 10) * 100;
@@ -166,6 +193,9 @@ function trade(ticker, quote) {
 	var buy = false;
 	var sell = false;
 
+	/*
+	 * [JavaProject] Buy and Sell decisions by EMA Slope
+	 */
 	if(slope > 0.18) {
 		buy = true;
 	}
@@ -176,13 +206,28 @@ function trade(ticker, quote) {
 
 	db.addPrice(ticker, current_price, now, data.last_vol);
 
+	/*
+	 * [JavaProject] 330 price points/quota. Because Tradr loads price point/quota every minute,
+	 *   330 minutes cover 5.5 hours of stock market open - from 9:30am to 16:00pm EST.
+	 *   A ticker/stock can only be purchased if it hasn't been bought in the day.
+	 */
 	//buy 
 	if(buy && data.bought_at == 0 && data.prices.length < 330) {
+		/*
+		 * [JavaProject] when buying a stock, it buys a fixed shares of any specific symbol, defined at array shares above
+		 */
 		transactions.push('buying '+data.shares+' of '+data.sym+' at '+data.current_price);
 		data.bought_at = current_price;
+		/*
+		 * [JavaProject] Transaction is tracked, for book-keeping and debugging of the bot behavior.
+		 */
 		db.addTransaction(ticker, "BUY", data.bought_at, null, data.shares, now);
 	}
 
+	/*
+	 * [JavaProject] A ticker/stock can only be sold, if it has been bought in the day, and its purchase price is lower than
+	 *   current price, so a profit can be made. Rule#1 - don't lose moeny; Rule#2 - refers to rule#1.
+	 */
 	//sell
 	if((data.bought_at !=0 && current_price > data.bought_at) && (sell || sellTime())) {
 		sellStock(data);
@@ -219,19 +264,25 @@ function main() {
 	//dont trade mid minute
 	if(now.getSeconds() == 0) {
 		if(market_open) {
-			// [JavaProject] getQuotes() gets the prices (quotes) and then does the trade
+			/* 
+			 * [JavaProject] getQuotes() gets the prices (quotes) and then does the trade
+			 */
 			getQuotes(); 
 
 			if(marketClosed())
 				market_open = false;
 		} else {
-			// [JavaProject] if market is closed, tk.marketStatus() calls into TradingKing API and see if market is open
+			/* 
+			 * [JavaProject] if market is closed, tk.marketStatus() calls into TradingKing API and see if market is open
+			 */
 			tk.marketStatus(function(data) {
 				var s = data.response.status.current;
 
 				if(s == "open") {
 					market_open = true;
-					// [JavaProject] getQuotes() gets the prices (quotes) and then does the trade
+					/* 
+					 * [JavaProject] getQuotes() gets the prices (quotes) and then does the trade
+					 */
 					getQuotes(); 
 				}
 			});
@@ -240,5 +291,7 @@ function main() {
 }
 
 main();
-// [JavaProject] checking-quota every 1 second.
+/*
+ * [JavaProject] checking-quota every 1 second.
+ */
 setInterval(main, 1000);
