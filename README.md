@@ -19,3 +19,5 @@ References -
     - [tradingKing.js](./tradingking.js)
     - https://www.ally.com/api/invest/documentation/market-ext-quotes-get-post/
 6. [app.js](./app.js) is the main program of Tradr - the magic starts here.
+7. Javascript can handle JSON response from TradingKing API natively (as Javascript objects). However, it is not hard to parse and read JSON file in Java either -
+    - https://stackoverflow.com/questions/10926353/how-to-read-json-file-into-java-with-simple-json-library
