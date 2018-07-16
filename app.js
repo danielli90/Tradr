@@ -117,16 +117,16 @@ function sellStock(data) {
 function trade(ticker, quote) {
 	if(portfolio[ticker] == null) {
 		portfolio[ticker] = {'sma':[], 
-			                   'prices':[], 
-												 'slopes':[],
-												 'bought_at':0,
-												 'sold_at':0,
-												 'profit':0,
-												 'current_sma':0,
+			                'prices':[], 
+					'slopes':[],
+					'bought_at':0,
+					'sold_at':0,
+				        'profit':0,
+					'current_sma':0,
 		                     'current_price':0,
-												 'shares':shares[ticker],
-												 'sym':ticker,
-												 'last_vol':0};
+					'shares':shares[ticker],
+					'sym':ticker,
+					'last_vol':0};
 	}
 
 	data = portfolio[ticker];
@@ -189,6 +189,9 @@ function trade(ticker, quote) {
 	}
 }
 
+/*
+ * [JavaProject] getQuotes() gets the prices (quotes) and then does the trade
+ */
 function getQuotes() {
 	tk.quotes(watch, function(data) {
 		if (data == null || data.response == null || data.response.quotes == null) {
@@ -197,6 +200,7 @@ function getQuotes() {
 			return;
 		}
 
+		// loop thru the stock symbols and does the trade
 		for(var i=0; i<data.response.quotes.instrumentquote.length;i++) {
 			instrument = data.response.quotes.instrumentquote[i]
 			quote = instrument.quote
@@ -215,17 +219,20 @@ function main() {
 	//dont trade mid minute
 	if(now.getSeconds() == 0) {
 		if(market_open) {
-			getQuotes();
+			// [JavaProject] getQuotes() gets the prices (quotes) and then does the trade
+			getQuotes(); 
 
 			if(marketClosed())
 				market_open = false;
 		} else {
+			// [JavaProject] if market is closed, tk.marketStatus() calls into TradingKing API and see if market is open
 			tk.marketStatus(function(data) {
 				var s = data.response.status.current;
 
 				if(s == "open") {
 					market_open = true;
-					getQuotes();
+					// [JavaProject] getQuotes() gets the prices (quotes) and then does the trade
+					getQuotes(); 
 				}
 			});
 		}
@@ -233,4 +240,5 @@ function main() {
 }
 
 main();
+// [JavaProject] checking-quota every 1 second.
 setInterval(main, 1000);
